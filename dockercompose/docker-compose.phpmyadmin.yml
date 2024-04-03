@@ -1,0 +1,25 @@
+version: "3.7"
+
+services:
+  # 1. {APPLICATION_NAME}_{SERVICE_NAME}_phpmyadmin_{MODE}
+  application_service_phpmyadmin_mode:
+    image: phpmyadmin
+    restart: always
+    # 2. same as 1
+    container_name: application_service_phpmyadmin_mode
+    networks:
+      # 3. {APPLICATION_NAME}-net-{MODE} with a specific mode we should create a network
+      # example: application-net-stage and application-net-prod or application-net
+      - application-net-mode
+    ports:
+      # 4. port is exposed for nginx reverse proxy
+      - "127.0.0.1:9840:80"
+    environment:
+      # 5. mariadb contianer name and port -> mariadbnetworkname:3306 (or any other port)
+      PMA_HOST: application_service_database_mode:3306
+      # 6. {APPLICATION_NAME}_{SERVICE_NAME}_{MODE}_MARIADB_RT_PASSWORD
+      MYSQL_ROOT_PASSWORD: ${APPLICATION_SERVICE_MODE_MARIADB_RT_PASSWORD}
+networks:
+  # 7. {APPLICATION_NAME}-net-{MODE}
+  safaro-net-stage:
+    external: true

@@ -1,0 +1,52 @@
+version: "3.7"
+
+services:
+  # 1. {APPLICATION_NAME}_{SERVICE_NAME}_mariadb_{MODE}
+  application_service_mariadb_mode:
+    image: docker.io/bitnami/mariadb:11.1
+    # 2. same as 1
+    container_name: application_service_mariadb_mode
+    restart: always
+    ports:
+      # 3. port is exposed for phpmyadmin panel and in inner network use cases it is better to be used like this
+      # example: application_service_mariadb_mode: 3306
+      # which 3306 is the default port
+      - "3310:3306"
+    networks:
+      # 4. {APPLICATION_NAME}-net-{MODE} with a specific mode we should create a network
+      # example: application-net-stage and application-net-prod or application-net
+      - application-net-mode
+    volumes:
+      # 5. {APPLICATION_NAME}_{SERVICE_NAME}_db_data_{MODE}
+      - "application_backoffice_db_data_stage:/bitnami/mariadb"
+    environment:
+      # 6. a user name for mariadb
+      - MARIADB_USER=application
+      # 7. {APPLICATION_NAME}_{SERVICE_NAME}_db
+      - MARIADB_DATABASE=application_service_db
+      # 8. {APPLICATION_NAME}_{SERVICE_NAME}_{MODE}_MARIADB_UR_PASSWORD
+      - MARIADB_PASSWORD=${APPLICATION_SERVICE_MODE_MARIADB_UR_PASSWORD}
+      # 9. {APPLICATION_NAME}_{SERVICE_NAME}_{MODE}_MARIADB_RT_PASSWORD
+      - MARIADB_ROOT_PASSWORD=${APPLICATION_SERVICE_MODE_MARIADB_RT_PASSWORD}
+      - ALLOW_EMPTY_PASSWORD=no
+    healthcheck:
+      test: ["CMD", "/opt/bitnami/scripts/mariadb/healthcheck.sh"]
+      interval: 15s
+      timeout: 5s
+      retries: 6
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: 4096M
+        reservations:
+          cpus: "2"
+          memory: 2048M
+volumes:
+  # 10 . {APPLICATION_NAME}_{SERVICE_NAME}_db_data_{MODE}
+  application_service_db_data_mode:
+
+networks:
+  # 11. {APPLICATION_NAME}-net-{MODE}
+  application-net-mode:
+    external: true

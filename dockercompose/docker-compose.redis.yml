@@ -1,0 +1,31 @@
+version: "3.1"
+
+services:
+  # 1. {APPLICATION_NAME}_redis_{MODE} if required add {SERVICE_NAME} after {APPLICATION_NAME} like {APPLICATION_NAME}_{SERVICE_NAME}_redis_{MODE}
+  application_service_redis_mode:
+    image: bitnami/redis:7.2.3
+    # 2. same as 1: {APPLICATION_NAME}_{SERVICE_NAME}_redis_{MODE}
+    container_name: application_service_redis_mode
+    restart: always
+    ports:
+      # 3. port
+      - "127.0.0.1:6378:6379"
+    command: redis-server --save "" --requirepass ${APPLICATION_SERVICE_REDIS_MODE_PASSWORD}
+    volumes:
+      # 4. same as one for storing the data: {APPLICATION_NAME}_{SERVICE_NAME}_redis_{MODE}
+      - application_service_redis_mode:/bitnami/redis/data
+    environment:
+      - ALLOW_EMPTY_PASSWORD=no
+    networks:
+      # 5. network name: {APPLICATION_NAME}-net-{MODE}
+      application-net-mode
+
+volumes:
+  # 6. same as 4: {APPLICATION_NAME}_{SERVICE_NAME}_redis_{MODE}
+  application_service_redis_mode:
+    driver: local
+
+networks:
+  # 7. {APPLICATION_NAME}-net-{MODE}
+  application-net-mode:
+    external: true
